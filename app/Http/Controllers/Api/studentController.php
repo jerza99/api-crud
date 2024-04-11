@@ -105,4 +105,40 @@ class studentController extends Controller{
         ];
         return response()->json($data, 200);
     }
+
+    public function update(Request $request, $id){
+
+        $students = Student::find($id);
+        if (!$students) {
+            $data = [
+                'message' => 'Estudiante no encontrado',
+                'status' => 404
+            ];
+            return response()->json($data, 404);
+        }
+
+        $validator = Validator::make($request->all(),[
+            'name' => 'required|max:255',
+            'email' => 'required|email|unique:student',
+            'phone' => 'required|digits:10',
+            'language' => 'required|in:English,Spanish,French',
+        ]);
+
+        if ($validator->fails()) {
+            $data = [
+                'message' => 'Error en la validacion de los datos',
+                'error' => $validator->errors(),
+                'status' => 400
+            ];
+            return response()->json($data, 400);
+        }
+
+        $students->name = $request->name;
+        $students->email = $request->email;
+        $students->phone = $request->phone;
+        $students->language = $request->language;
+
+        $students->save();
+
+    }
 }
